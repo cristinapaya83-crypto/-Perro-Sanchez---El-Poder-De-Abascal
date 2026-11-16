@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "pedro_sprites.h"
 
 /* =====================================================
    PERRO SANCHEZ: EL PODER DE ABASCAL
@@ -15,8 +16,8 @@
 #define SH 192
 #define WORLD_W 900
 #define GROUND 165
-#define PLAYER_W 22
-#define PLAYER_H 38
+#define PLAYER_W 40
+#define PLAYER_H 48
 #define MAX_COINS 12
 #define MAX_ITEMS 3
 #define MAX_ENEMIES 5
@@ -204,23 +205,21 @@ static void borderRect(int x, int y, int w, int h, u16 color) {
 
 /* Personajes dibujados a mano con bloques de pixel art. */
 static void drawPedro(int x, int y) {
-    u16 skin=RGB(24,17,12), shadow=RGB(16,10,8), hair=RGB(7,5,4);
-    u16 suit=RGB(5,9,19), suitHi=RGB(9,15,28), shirt=RGB(29,29,27);
-    u16 tie=RGB(25,4,5), white=RGB(31,31,31);
-    /* pelo y cabeza */
-    rect(x+5,y,13,5,hair); rect(x+3,y+3,17,5,hair);
-    rect(x+4,y+6,16,13,skin); rect(x+4,y+15,16,3,shadow);
-    rect(x+6,y+9,3,2,white); rect(x+15,y+9,3,2,white);
-    pixel(x+7,y+10,RGB(2,3,5)); pixel(x+16,y+10,RGB(2,3,5));
-    rect(x+10,y+13,5,2,RGB(17,7,6)); rect(x+9,y+16,7,2,RGB(18,5,5));
-    /* cuello, camisa y traje */
-    rect(x+9,y+18,7,4,skin); rect(x+3,y+21,18,11,suit);
-    rect(x+8,y+20,8,12,shirt); rect(x+10,y+21,4,10,tie);
-    rect(x+2,y+22,5,12,suitHi); rect(x+18,y+22,5,12,suitHi);
-    pixel(x+6,y+25,RGB(20,22,26)); pixel(x+17,y+25,RGB(20,22,26));
-    /* piernas y zapatos */
-    rect(x+5,y+32,6,5,suit); rect(x+14,y+32,6,5,suit);
-    rect(x+3,y+36,8,2,RGB(3,3,5)); rect(x+14,y+36,8,2,RGB(3,3,5));
+    int pose;
+    int xx, yy;
+    if (player.vy < -1.0f) pose = 5;              /* salto */
+    else if (player.vy > 2.0f) pose = 6;          /* caida */
+    else if (player.grounded && (frame / 7) % 4 == 1) pose = 1;
+    else if (player.grounded && (frame / 7) % 4 == 2) pose = 2;
+    else if (player.grounded && (frame / 7) % 4 == 3) pose = 3;
+    else pose = 0;
+    for (yy=0; yy<PEDRO_SPR_H; yy++) {
+        for (xx=0; xx<PEDRO_SPR_W; xx++) {
+            int drawX = (player.facing < 0) ? (PEDRO_SPR_W-1-xx) : xx;
+            u16 c = pedroFrames[pose][yy*PEDRO_SPR_W+xx];
+            if (c) pixel(x+drawX,y+yy,c);
+        }
+    }
 }
 
 static void drawAbascal(int x, int y) {
@@ -956,29 +955,66 @@ static void drawGame(void) {
     }
 }
 
+/* Fuente pixel 5x7 para rotulos de la pantalla superior. */
+static void drawGlyph(int x,int y,char ch,u16 c) {
+    static const unsigned char font[36][5] = {
+      {14,17,17,31,17},{30,17,30,17,30},{14,17,16,17,14},{30,17,17,17,30},
+      {31,16,30,16,31},{31,16,30,16,16},{14,17,23,17,15},{17,17,31,17,17},
+      {14,4,4,4,14},{7,2,2,18,12},{17,18,28,18,17},{16,16,16,16,31},
+      {17,27,21,17,17},{17,25,21,19,17},{14,17,17,17,14},{30,17,30,16,16},
+      {14,17,17,21,10},{30,17,30,18,17},{15,16,14,1,30},{31,4,4,4,4},
+      {17,17,17,17,14},{17,17,17,10,4},{17,17,21,27,17},{17,10,4,10,17},
+      {17,10,4,4,4},{31,2,4,8,31},
+      {14,17,19,21,14},{4,12,4,4,14},{14,17,2,8,31},{30,1,6,1,30},
+      {2,6,10,31,2},{31,16,30,1,30},{14,16,30,17,14},{31,1,2,4,4},
+      {14,17,14,17,14},{14,17,15,1,14}
+    };
+    int idx=-1,col,row;
+    if(ch>='A'&&ch<='Z') idx=ch-'A';
+    else if(ch>='0'&&ch<='9') idx=26+ch-'0';
+    if(idx<0) return;
+    for(col=0;col<5;col++) for(row=0;row<5;row++)
+        if(font[idx][col] & (1<<(4-row))) rect(x+col*2,y+row*2,2,2,c);
+}
+static void drawText(int x,int y,const char *str,u16 c,int scaleGap) {
+    while(*str){ if(*str!=' ') drawGlyph(x,y,*str,c); x+=12+scaleGap; str++; }
+}
+
 /* =====================================================
    MENU RENDERING
    ===================================================== */
 
 static void drawMenu(void) {
     int i;
-    clearScreen(RGB(18,25,31));
-    /* cielo, nubes y sol */
-    rect(0,0,256,112,RGB(17,25,31)); rect(199,15,25,25,RGB(31,27,12));
-    for(i=0;i<4;i++){int x=15+i*68;rect(x,27,27,5,RGB(31,31,31));rect(x+6,22,15,5,RGB(31,31,31));}
-    /* colinas */
-    rect(0,104,256,24,RGB(12,22,13)); rect(0,117,256,14,RGB(8,20,10));
-    rect(0,130,256,62,RGB(10,24,12));
-    for(i=0;i<13;i++){int x=i*22;rect(x,119+(i%3)*5,3,14,RGB(6,18,9));rect(x+5,122+(i%2)*4,2,10,RGB(6,18,9));}
-    /* título como placa de videojuego */
-    rect(28,8,200,27,RGB(7,16,26)); borderRect(28,8,200,27,RGB(31,25,8));
-    rect(34,14,188,3,RGB(28,8,6)); rect(34,26,188,3,RGB(28,8,6));
-    /* personajes grandes y reconocibles */
-    drawPedroBig(30,54); drawAbascalBig(181,54);
-    /* botones */
-    rect(78,139,100,19,RGB(9,25,13)); borderRect(78,139,100,19,RGB(31,27,8));
-    rect(78,163,100,19,RGB(8,15,27)); borderRect(78,163,100,19,RGB(25,29,31));
-    rect(86,145,84,2,RGB(20,31,18)); rect(86,169,84,2,RGB(17,23,31));
+    clearScreen(RGB(17,25,31));
+    /* cielo de amanecer */
+    rect(0,0,256,112,RGB(18,26,31));
+    rect(0,74,256,38,RGB(22,27,29));
+    /* sol y nubes */
+    rect(199,18,24,24,RGB(31,27,12)); rect(194,23,34,14,RGB(31,27,12));
+    for(i=0;i<4;i++){int x=12+i*66;rect(x,27,30,5,RGB(31,31,31));rect(x+6,22,17,5,RGB(31,31,31));}
+    /* skyline pixel art */
+    rect(0,93,256,34,RGB(12,19,24));
+    for(i=0;i<9;i++){int x=i*31;int hh=18+(i*13)%25;rect(x,127-hh,22,hh,RGB(15,22,27));
+        rect(x+4,132-hh,4,5,RGB(31,24,12));rect(x+13,132-hh,4,5,RGB(31,24,12));}
+    /* colinas y cesped */
+    rect(0,128,256,64,RGB(9,23,13)); rect(0,137,256,55,RGB(12,27,14));
+    for(i=0;i<16;i++){int x=(i*19)%256;rect(x,133+(i%3)*5,3,12,RGB(5,17,9));}
+    /* placa principal brillante */
+    rect(13,5,230,40,RGB(6,14,25)); borderRect(13,5,230,40,RGB(31,26,11));
+    rect(18,10,220,3,RGB(26,7,6));
+    drawText(34,16,"PERRO SANCHEZ",RGB(31,31,28),0);
+    drawText(46,31,"EL PODER DE ABASCAL",RGB(31,22,7),-3);
+    /* personajes protagonistas */
+    drawPedroBig(24,56); drawAbascalBig(188,56);
+    /* podio central y botones */
+    rect(79,115,98,18,RGB(6,13,24)); borderRect(79,115,98,18,RGB(31,24,8));
+    drawText(94,121,"A JUGAR",RGB(31,31,31),-4);
+    rect(79,140,98,18,RGB(7,19,13)); borderRect(79,140,98,18,RGB(21,29,19));
+    drawText(88,146,"Y CREDITOS",RGB(31,31,31),-5);
+    /* brillos decorativos */
+    pixel(18,169,RGB(31,25,8));pixel(237,169,RGB(31,25,8));
+    rect(0,184,256,8,RGB(5,14,10));
 }
 
 /* =====================================================
@@ -1049,6 +1085,7 @@ static void updateConsole(void) {
     if (state==MENU) {
         iprintf("  A - JUGAR\n");
         iprintf("  Y - CREDITOS\n");
+        iprintf("  FLECHAS - MOVERSE  B - SALTAR\n");
         iprintf("\n  Flechas: moverse | B: saltar");
     }
 

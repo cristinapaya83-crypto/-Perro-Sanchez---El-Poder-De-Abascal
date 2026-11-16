@@ -1,18 +1,20 @@
-name: Compilar Juego DS
-
-on: [push]
-
+name: Build Nintendo DS
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: devkitpro/devkitarm:latest
+    container: devkitpro/devkitarm:latest
     steps:
       - uses: actions/checkout@v4
-      - name: Compilar NDS
-        run: make
-      - name: Subir archivo NDS
-        uses: actions/upload-artifact@v4
+      - name: Build NDS
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=/opt/devkitpro/devkitARM
+          make
+      - uses: actions/upload-artifact@v4
         with:
           name: PerroSanchez_DS
           path: PerroSanchez_DS.nds
