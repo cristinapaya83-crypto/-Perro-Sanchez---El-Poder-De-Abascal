@@ -8,19 +8,19 @@
 /* =====================================================
    PERRO SANCHEZ: EL PODER DE ABASCAL
    Nintendo DSi - libnds
-   Version 0.2
+   Version 0.3 - Pixel art detallado
    ===================================================== */
 
 #define SW 256
 #define SH 192
 #define WORLD_W 900
 #define GROUND 165
-#define PLAYER_W 14
-#define PLAYER_H 24
+#define PLAYER_W 22
+#define PLAYER_H 38
 #define MAX_COINS 12
 #define MAX_ITEMS 3
 #define MAX_ENEMIES 5
-#define LEVELS 15
+#define LEVELS 16
 
 #define RGB(r,g,b) (RGB15(r,g,b) | BIT(15))
 
@@ -80,7 +80,7 @@ typedef struct {
    GLOBAL VARIABLES
    ===================================================== */
 
-static volatile u16 *fb = (volatile u16 *)0x06800000;
+static volatile u16 *fb = (volatile u16 *)0x06000000;
 
 static State state = MENU;
 
@@ -138,7 +138,8 @@ static const char *levelNames[LEVELS] = {
     "CASTILLA LA MANCHA",
     "VALENCIA",
     "MURCIA",
-    "ANDALUCIA"
+    "ANDALUCIA",
+    "MADRID - FINAL"
 };
 
 static const char *levelCities[LEVELS] = {
@@ -156,25 +157,14 @@ static const char *levelCities[LEVELS] = {
     "Toledo",
     "Valencia",
     "Murcia",
+    "Granada",
     "La Moncloa"
 };
 
 static const u16 skyColors[LEVELS] = {
-    RGB(8,15,22),
-    RGB(10,18,25),
-    RGB(12,18,25),
-    RGB(8,12,22),
-    RGB(15,18,25),
-    RGB(20,17,10),
-    RGB(12,18,28),
-    RGB(19,15,10),
-    RGB(12,17,20),
-    RGB(15,15,23),
-    RGB(23,15,9),
-    RGB(22,17,9),
-    RGB(22,18,12),
-    RGB(23,17,9),
-    RGB(12,5,12)
+    RGB(17,25,31), RGB(15,24,31), RGB(18,25,31), RGB(17,23,30), RGB(20,26,31),
+    RGB(24,24,20), RGB(18,25,31), RGB(24,24,20), RGB(18,25,29), RGB(20,25,31),
+    RGB(27,23,17), RGB(27,25,19), RGB(28,26,20), RGB(28,25,18), RGB(27,24,18), RGB(18,23,31)
 };
 
 /* =====================================================
@@ -212,84 +202,79 @@ static void borderRect(int x, int y, int w, int h, u16 color) {
    PIXEL ART CHARACTERS
    ===================================================== */
 
+/* Personajes dibujados a mano con bloques de pixel art. */
 static void drawPedro(int x, int y) {
-    u16 skin = RGB(24,17,12);
-    u16 hair = RGB(8,6,4);
-    u16 suit = RGB(5,8,18);
-    u16 white = RGB(31,31,31);
-
-    rect(x+3,y,9,8,skin);
-    rect(x+2,y,11,3,hair);
-
-    pixel(x+5,y+4,white);
-    pixel(x+9,y+4,white);
-
-    rect(x+6,y+7,4,1,hair);
-
-    rect(x+2,y+9,12,10,suit);
-    rect(x+6,y+9,3,8,white);
-
-    rect(x+3,y+19,4,5,suit);
-    rect(x+10,y+19,4,5,suit);
+    u16 skin=RGB(24,17,12), shadow=RGB(16,10,8), hair=RGB(7,5,4);
+    u16 suit=RGB(5,9,19), suitHi=RGB(9,15,28), shirt=RGB(29,29,27);
+    u16 tie=RGB(25,4,5), white=RGB(31,31,31);
+    /* pelo y cabeza */
+    rect(x+5,y,13,5,hair); rect(x+3,y+3,17,5,hair);
+    rect(x+4,y+6,16,13,skin); rect(x+4,y+15,16,3,shadow);
+    rect(x+6,y+9,3,2,white); rect(x+15,y+9,3,2,white);
+    pixel(x+7,y+10,RGB(2,3,5)); pixel(x+16,y+10,RGB(2,3,5));
+    rect(x+10,y+13,5,2,RGB(17,7,6)); rect(x+9,y+16,7,2,RGB(18,5,5));
+    /* cuello, camisa y traje */
+    rect(x+9,y+18,7,4,skin); rect(x+3,y+21,18,11,suit);
+    rect(x+8,y+20,8,12,shirt); rect(x+10,y+21,4,10,tie);
+    rect(x+2,y+22,5,12,suitHi); rect(x+18,y+22,5,12,suitHi);
+    pixel(x+6,y+25,RGB(20,22,26)); pixel(x+17,y+25,RGB(20,22,26));
+    /* piernas y zapatos */
+    rect(x+5,y+32,6,5,suit); rect(x+14,y+32,6,5,suit);
+    rect(x+3,y+36,8,2,RGB(3,3,5)); rect(x+14,y+36,8,2,RGB(3,3,5));
 }
 
 static void drawAbascal(int x, int y) {
-    u16 skin = RGB(23,16,11);
-    u16 hair = RGB(7,5,4);
-    u16 suit = RGB(9,8,12);
-
-    rect(x+3,y,10,9,skin);
-    rect(x+2,y,12,3,hair);
-
-    pixel(x+5,y+4,RGB(31,31,31));
-    pixel(x+10,y+4,RGB(31,31,31));
-
-    rect(x+4,y+6,9,3,RGB(8,6,5));
-    rect(x+1,y+10,15,11,suit);
-
-    rect(x+7,y+10,3,9,RGB(31,31,31));
-
-    rect(x+3,y+21,4,5,suit);
-    rect(x+10,y+21,4,5,suit);
+    u16 skin=RGB(23,16,11), shadow=RGB(13,8,7), hair=RGB(6,5,5);
+    u16 beard=RGB(8,6,5), suit=RGB(8,9,14), shirt=RGB(29,29,27);
+    rect(x+7,y,16,5,hair); rect(x+4,y+3,20,5,hair);
+    rect(x+5,y+6,18,13,skin);
+    rect(x+8,y+10,3,2,RGB(31,31,31)); rect(x+18,y+10,3,2,RGB(31,31,31));
+    pixel(x+9,y+11,RGB(1,2,3)); pixel(x+19,y+11,RGB(1,2,3));
+    /* barba y mandíbula */
+    rect(x+6,y+15,17,6,beard); rect(x+9,y+18,11,3,shadow);
+    rect(x+10,y+20,8,4,skin);
+    rect(x+3,y+23,20,10,suit); rect(x+9,y+22,9,11,shirt);
+    rect(x+12,y+23,3,10,RGB(4,7,13));
+    rect(x+2,y+24,5,10,suit); rect(x+20,y+24,5,10,suit);
+    rect(x+6,y+33,6,4,suit); rect(x+16,y+33,6,4,suit);
+    rect(x+4,y+36,8,2,RGB(2,2,3)); rect(x+16,y+36,8,2,RGB(2,2,3));
 }
 
-/* Enemigos urbanos PSG ficticios */
+static void drawPedroBig(int x,int y) {
+    /* retrato ampliado, conservando el pixelado */
+    rect(x+10,y,28,10,RGB(7,5,4)); rect(x+7,y+7,34,25,RGB(24,17,12));
+    rect(x+13,y+18,6,4,RGB(31,31,31)); rect(x+30,y+18,6,4,RGB(31,31,31));
+    pixel(x+16,y+20,RGB(1,2,4)); pixel(x+33,y+20,RGB(1,2,4));
+    rect(x+19,y+27,12,4,RGB(17,7,6));
+    rect(x+5,y+34,38,29,RGB(5,9,19)); rect(x+15,y+34,18,28,RGB(29,29,27));
+    rect(x+22,y+36,5,25,RGB(25,4,5));
+    rect(x+9,y+63,13,10,RGB(5,9,19)); rect(x+28,y+63,13,10,RGB(5,9,19));
+}
+static void drawAbascalBig(int x,int y) {
+    rect(x+11,y,27,10,RGB(6,5,5)); rect(x+6,y+7,37,26,RGB(23,16,11));
+    rect(x+14,y+18,6,4,RGB(31,31,31)); rect(x+31,y+18,6,4,RGB(31,31,31));
+    pixel(x+17,y+20,RGB(1,2,3)); pixel(x+34,y+20,RGB(1,2,3));
+    rect(x+9,y+28,32,9,RGB(8,6,5)); rect(x+16,y+35,19,5,RGB(8,6,5));
+    rect(x+5,y+40,39,24,RGB(8,9,14)); rect(x+16,y+40,18,23,RGB(29,29,27));
+    rect(x+22,y+42,5,21,RGB(4,7,13));
+    rect(x+10,y+64,13,9,RGB(8,9,14)); rect(x+29,y+64,13,9,RGB(8,9,14));
+}
 
 static void drawPSGEnemy(int x, int y, int animation, int skinType) {
-    u16 skin;
-    u16 blue = RGB(3,8,27);
-    u16 black = RGB(2,2,3);
-
-    if (skinType == 0)
-        skin = RGB(10,7,5);
-    else if (skinType == 1)
-        skin = RGB(19,13,9);
-    else
-        skin = RGB(25,18,13);
-
-    /* Gorra */
-    rect(x+2,y,12,4,black);
-    rect(x+5,y-2,8,3,RGB(20,16,8));
-
-    /* Cabeza */
-    rect(x+4,y+4,9,8,skin);
-
-    /* Ojos */
-    pixel(x+6,y+7,RGB(31,31,31));
-    pixel(x+10,y+7,RGB(31,31,31));
-
-    /* Chandal */
-    rect(x+2,y+12,14,9,blue);
-    rect(x+8,y+12,2,8,RGB(31,3,5));
-
-    /* Piernas */
-    if (animation % 2 == 0) {
-        rect(x+3,y+21,4,6,blue);
-        rect(x+11,y+21,4,4,blue);
-    } else {
-        rect(x+3,y+21,4,4,blue);
-        rect(x+11,y+21,4,6,blue);
-    }
+    u16 skin = skinType==0 ? RGB(10,7,5) : (skinType==1 ? RGB(19,13,9) : RGB(25,18,13));
+    u16 blue=RGB(3,8,27), blueHi=RGB(7,16,40), black=RGB(2,2,3);
+    /* gorra con visera y cabeza */
+    rect(x+4,y,14,4,black); rect(x+7,y-2,10,3,RGB(20,16,8));
+    rect(x+15,y+3,8,2,black); rect(x+5,y+4,14,11,skin);
+    pixel(x+8,y+8,RGB(31,31,31)); pixel(x+15,y+8,RGB(31,31,31));
+    pixel(x+9,y+8,RGB(1,2,3)); pixel(x+16,y+8,RGB(1,2,3));
+    rect(x+10,y+12,6,2,RGB(12,5,5));
+    /* chándal con cremallera y bandas */
+    rect(x+2,y+15,20,12,blue); rect(x+3,y+16,4,10,blueHi);
+    rect(x+17,y+16,4,10,blueHi); rect(x+11,y+15,2,11,RGB(31,3,5));
+    if(animation%2==0){rect(x+4,y+27,6,5,blue);rect(x+14,y+27,6,3,blue);}
+    else{rect(x+4,y+27,6,3,blue);rect(x+14,y+27,6,5,blue);}
+    rect(x+2,y+31,9,2,black); rect(x+14,y+31,9,2,black);
 }
 
 /* Mini jefe regional */
@@ -314,49 +299,98 @@ static void drawRegionalBoss(int x, int y) {
 
 static void drawBackground(void) {
     int i;
-
     clearScreen(skyColors[currentLevel]);
-
-    /* Sol */
-    rect(210,20,16,16,RGB(31,26,13));
-
-    /* Montanas */
-    for (i=0; i<5; i++) {
-        int x = (i*80 - cameraX/4) % 320;
-
-        if (x < -50) x += 320;
-
-        rect(x,110,48,30,RGB(8,10,14));
-        rect(x+12,98,25,12,RGB(12,13,17));
+    /* nubes claras */
+    for(i=0;i<4;i++){
+        int x=(i*83-cameraX/5)%300; if(x< -35)x+=300;
+        rect(x,27+(i%2)*15,28,5,RGB(31,31,31));
+        rect(x+6,22+(i%2)*15,16,5,RGB(31,31,31));
     }
-
-    /* Elementos de ciudad */
-    if (currentLevel == 6) {
-        /* Barcelona */
-        rect(170,65,25,80,RGB(20,17,12));
-        rect(177,48,12,17,RGB(24,18,12));
-        rect(174,45,18,3,RGB(31,22,9));
+    rect(210,17,17,17,RGB(31,27,12)); rect(214,13,9,25,RGB(31,29,18));
+    /* cordillera en tres planos */
+    for(i=0;i<5;i++){
+        int x=(i*76-cameraX/4)%330; if(x< -55)x+=330;
+        rect(x,112,55,34,RGB(12,18,22)); rect(x+12,98,30,18,RGB(17,22,25));
+        rect(x+20,99,10,7,RGB(27,29,29));
+        rect(x+7,125,4,13,RGB(8,22,13)); rect(x+40,120,5,18,RGB(8,22,13));
     }
-
-    if (currentLevel == 9) {
-        /* Madrid */
-        rect(175,65,45,80,RGB(18,13,15));
-        rect(185,45,25,20,RGB(23,17,15));
+    /* Cada comunidad tiene un decorado reconocible y diferente. */
+    switch(currentLevel) {
+      case 0: /* Galicia: catedral y tejados de Santiago */
+        rect(24,100,50,45,RGB(23,18,13)); rect(31,87,35,13,RGB(27,22,16));
+        rect(39,72,8,15,RGB(28,23,17)); rect(52,68,8,19,RGB(28,23,17));
+        rect(35,94,28,4,RGB(31,25,16)); break;
+      case 1: /* Asturias: Picos de Europa */
+        rect(0,107,90,38,RGB(8,21,13)); rect(20,89,38,28,RGB(15,22,23));
+        rect(32,77,15,15,RGB(28,29,28)); rect(70,98,45,47,RGB(9,22,13)); break;
+      case 2: /* Cantabria: costa y faro */
+        rect(0,130,256,15,RGB(8,19,28)); rect(185,82,9,62,RGB(24,21,15));
+        rect(179,76,21,7,RGB(29,26,18)); rect(183,68,13,8,RGB(31,27,14));
+        rect(0,140,256,5,RGB(16,25,29)); break;
+      case 3: /* País Vasco: museo moderno */
+        rect(155,95,65,50,RGB(20,21,22)); rect(166,83,44,12,RGB(27,27,25));
+        rect(173,76,32,7,RGB(31,29,23)); rect(164,107,48,3,RGB(31,26,16)); break;
+      case 4: /* Navarra: murallas y torre */
+        rect(145,102,75,43,RGB(22,18,13)); rect(155,87,14,15,RGB(26,22,16));
+        rect(187,79,16,23,RGB(26,22,16)); rect(180,73,30,6,RGB(29,24,17));
+        rect(151,119,64,4,RGB(29,23,15)); break;
+      case 5: /* Aragón: basílica del Pilar */
+        rect(139,103,80,42,RGB(24,20,15)); rect(150,88,17,15,RGB(27,23,17));
+        rect(180,84,14,19,RGB(27,23,17)); rect(204,88,10,15,RGB(27,23,17));
+        rect(145,99,75,4,RGB(31,26,17)); break;
+      case 6: /* Cataluña: Sagrada Familia */
+        rect(165,92,48,53,RGB(23,17,12)); rect(171,68,9,24,RGB(27,22,15));
+        rect(185,56,8,36,RGB(27,22,15)); rect(199,72,8,20,RGB(27,22,15));
+        rect(168,61,15,5,RGB(31,24,15)); rect(182,49,14,5,RGB(31,24,15));
+        rect(197,65,13,5,RGB(31,24,15)); break;
+      case 7: /* Castilla y León: castillo */
+        rect(145,105,76,40,RGB(22,18,13)); rect(151,87,16,18,RGB(27,22,15));
+        rect(176,82,18,23,RGB(27,22,15)); rect(205,91,12,14,RGB(27,22,15));
+        rect(147,100,72,5,RGB(31,25,16)); break;
+      case 8: /* La Rioja: viñedos y bodega */
+        rect(165,105,53,40,RGB(22,18,13)); rect(175,91,33,14,RGB(27,22,15));
+        for(i=0;i<5;i++) rect(18+i*22,132+(i%2)*4,12,3,RGB(15,25,10));
+        rect(0,139,256,3,RGB(20,27,12)); break;
+      case 9: /* Madrid: Puerta de Alcalá / ciudad */
+        rect(160,91,58,54,RGB(22,17,16)); rect(169,77,40,14,RGB(27,22,18));
+        rect(178,65,22,12,RGB(28,24,19)); rect(183,59,12,6,RGB(31,26,16));
+        for(i=0;i<4;i++) rect(167+i*12,104,5,13,RGB(31,24,13)); break;
+      case 10: /* Extremadura: teatro romano */
+        rect(151,105,70,40,RGB(22,18,13));
+        for(i=0;i<5;i++) rect(155+i*13,111,7,22,RGB(29,23,15));
+        rect(149,103,74,5,RGB(31,25,16)); rect(160,96,50,7,RGB(26,21,15)); break;
+      case 11: /* Castilla-La Mancha: molinos */
+        for(i=0;i<3;i++){
+          int x=35+i*68; rect(x,105,13,40,RGB(24,20,14));
+          rect(x-4,101,21,5,RGB(29,24,16)); rect(x+5,85,3,18,RGB(31,29,24));
+          rect(x-6,92,25,3,RGB(31,29,24)); rect(x+1,89,5,5,RGB(31,29,24));
+        } break;
+      case 12: /* Valencia: Ciudad de las Artes */
+        rect(30,110,60,35,RGB(23,21,17)); rect(40,98,40,12,RGB(29,27,22));
+        rect(48,91,24,7,RGB(31,30,27)); rect(101,119,55,26,RGB(20,23,24));
+        rect(108,111,42,8,RGB(28,29,27)); break;
+      case 13: /* Murcia: catedral y torre */
+        rect(164,100,48,45,RGB(24,19,14)); rect(180,67,17,33,RGB(28,23,16));
+        rect(176,61,25,6,RGB(31,25,16)); rect(183,53,11,8,RGB(28,23,16));
+        rect(170,115,36,5,RGB(31,25,16)); break;
+      case 14: /* Andalucia: Alhambra de Granada */
+        rect(143,99,80,46,RGB(24,17,12)); rect(151,87,65,12,RGB(28,21,14));
+        rect(159,78,13,9,RGB(29,22,15)); rect(185,73,13,14,RGB(29,22,15));
+        rect(150,108,67,4,RGB(31,24,15));
+        for(i=0;i<5;i++) rect(154+i*13,117,5,12,RGB(31,25,16)); break;
+      default: /* La Moncloa: sede del combate final */
+        rect(151,93,75,52,RGB(22,17,16)); rect(161,77,55,16,RGB(27,22,18));
+        rect(172,66,34,11,RGB(28,24,19)); rect(180,59,18,7,RGB(31,26,16));
+        for(i=0;i<5;i++) rect(159+i*13,105,6,11,RGB(31,24,13));
+        rect(148,91,81,4,RGB(31,26,17)); break;
     }
-
-    if (currentLevel == 12) {
-        /* Valencia */
-        rect(30,130,60,12,RGB(18,14,8));
-    }
-
-    /* Suelo */
-    rect(0,GROUND,SW,27,RGB(6,18,8));
-    rect(0,GROUND,SW,3,RGB(15,25,10));
-
-    for (i=0; i<8; i++) {
-        int x = (i*45-cameraX/2)%280;
-        if (x < 0) x += 280;
-        rect(x,145,4,8,RGB(5,20,7));
+    /* pradera con capas y flores */
+    rect(0,GROUND,SW,27,RGB(8,22,10)); rect(0,GROUND,SW,3,RGB(20,29,12));
+    rect(0,GROUND+5,SW,22,RGB(10,19,9));
+    for(i=0;i<22;i++){
+        int x=(i*17-cameraX/2)%270; if(x<0)x+=270;
+        rect(x,150+(i%3)*4,3,7,RGB(7,26,10));
+        if(i%4==0) pixel(x+4,153,RGB(31,22,13));
     }
 }
 
@@ -364,42 +398,56 @@ static void drawBackground(void) {
    MAP
    ===================================================== */
 
+static void fillPolygon(const int *px,const int *py,int n,u16 color) {
+    int y,x,i;
+    for(y=0;y<SH;y++){
+        int nodes[32],count=0;
+        for(i=0;i<n;i++){
+            int j=(i+1)%n;
+            if((py[i]<y && py[j]>=y)||(py[j]<y && py[i]>=y))
+                nodes[count++]=px[i]+(y-py[i])*(px[j]-px[i])/(py[j]-py[i]);
+        }
+        for(i=0;i<count-1;i++){
+            int k; for(k=i+1;k<count;k++) if(nodes[k]<nodes[i]){int t=nodes[i];nodes[i]=nodes[k];nodes[k]=t;}
+        }
+        for(i=0;i+1<count;i+=2) for(x=nodes[i];x<=nodes[i+1];x++) pixel(x,y,color);
+    }
+}
 static void drawMap(void) {
+    /* silueta reconocible de la España peninsular, no un bloque rectangular */
+    static const int sx[]={43,54,62,75,88,105,122,143,163,184,204,217,211,199,189,176,162,151,137,123,109,94,80,66,54};
+    static const int sy[]={63,49,44,48,42,46,42,48,46,53,61,76,91,102,115,126,136,145,147,140,143,132,124,108,87};
+    static const int mx[]={49,57,65,78,92,109,128,146,166,185,203,215,205,192,180,165,151,135,118,101,84,68,55};
+    static const int my[]={61,50,46,50,45,49,46,51,50,57,64,77,90,104,118,130,139,144,142,135,126,107,85};
     int i;
-
-    clearScreen(RGB(5,10,18));
-
-    /* Silueta aproximada */
-    rect(48,40,150,95,RGB(12,20,12));
-    rect(65,30,110,15,RGB(12,20,12));
-    rect(38,55,20,65,RGB(12,20,12));
-    rect(180,125,35,18,RGB(12,20,12));
-
-    /* Marcadores */
-    for (i=0; i<LEVELS; i++) {
-        int x = 52+(i%5)*37;
-        int y = 35+(i/5)*39;
-
-        u16 c = RGB(10,18,10);
-
-        if (i <= unlockedLevel)
-            c = RGB(12,27,12);
-
-        if (i == selectedLevel)
-            c = RGB(31,25,5);
-
-        if (i == 14)
-            c = RGB(25,5,5);
-
-        rect(x,y,12,12,c);
-        rect(x+3,y+3,6,6,RGB(31,31,31));
+    clearScreen(RGB(12,22,30));
+    /* Portugal y marcos de costa */
+    rect(18,50,5,92,RGB(9,17,23));
+    fillPolygon(sx,sy,25,RGB(8,14,17));
+    fillPolygon(mx,my,23,RGB(18,25,13));
+    /* regiones sugeridas por fronteras internas */
+    for(i=0;i<7;i++){
+        int x=75+i*17; rect(x,62+(i%3)*10,1,48,RGB(23,29,17));
     }
-
+    rect(198,130,5,3,RGB(18,25,13)); /* Baleares */
+    rect(205,137,3,2,RGB(18,25,13));
+    /* frontera costera pixelada */
+    for(i=0;i<25;i++) pixel(sx[i],sy[i],RGB(29,29,20));
+    /* puntos colocados aproximadamente en su geografía */
     {
-        int x = 52+(selectedLevel%5)*37;
-        int y = 35+(selectedLevel/5)*39;
-        borderRect(x-3,y-3,18,18,RGB(31,20,2));
+        static const int px[LEVELS]={52,87,108,139,153,170,190,111,139,137,77,113,205,190,154,136};
+        static const int py[LEVELS]={64,57,63,68,78,91,111,99,87,111,122,121,119,136,140,112};
+        for(i=0;i<LEVELS;i++){
+            u16 c=(i==selectedLevel)?RGB(31,24,5):(i<=unlockedLevel?RGB(25,12,4):RGB(8,10,9));
+            rect(px[i]-4,py[i]-4,9,9,c);
+            rect(px[i]-2,py[i]-2,5,5,(i<=unlockedLevel)?RGB(31,31,23):RGB(15,16,14));
+            if(i==15) rect(px[i]-5,py[i]-5,11,11,RGB(31,5,4));
+            if(i==selectedLevel) borderRect(px[i]-6,py[i]-6,13,13,RGB(31,28,9));
+        }
     }
+    /* título y panel decorativo */
+    rect(8,8,240,20,RGB(5,12,19)); borderRect(8,8,240,20,RGB(29,27,17));
+    rect(14,14,228,2,RGB(22,28,18));
 }
 
 /* =====================================================
@@ -410,7 +458,7 @@ static void initLevel(void) {
     int i;
 
     player.x = 15;
-    player.y = 130;
+    player.y = GROUND-PLAYER_H;
     player.vx = 0;
     player.vy = 0;
     player.grounded = 0;
@@ -423,17 +471,17 @@ static void initLevel(void) {
     jumpCooldown = 0;
     damageCooldown = 0;
 
-    bossMaxHealth = (currentLevel == 14) ? 8 : 3;
+    bossMaxHealth = (currentLevel == 15) ? 8 : 3;
     bossHealth = bossDefeated[currentLevel] ? 0 : bossMaxHealth;
 
     boss.x = 720;
-    boss.y = GROUND-42;
+    boss.y = GROUND-46;
     boss.health = bossHealth;
     boss.active = !bossDefeated[currentLevel];
     boss.direction = -1;
     boss.timer = 0;
 
-    finalBattle = (currentLevel == 14);
+    finalBattle = (currentLevel == 15);
 
     for (i=0; i<6; i++) {
         platforms[i].x = 125+i*125;
@@ -470,7 +518,7 @@ static void initLevel(void) {
 
     for (i=0; i<MAX_ENEMIES; i++) {
         enemies[i].x = 180+i*115;
-        enemies[i].y = GROUND-27;
+        enemies[i].y = GROUND-33;
         enemies[i].active = 1;
         enemies[i].direction = -1;
         enemies[i].animation = 0;
@@ -566,14 +614,12 @@ static void updatePlayer(u32 held,u32 pressed) {
 
     player.vx=0;
 
-    /* A = avanzar */
-    if (held & KEY_A) {
+    /* Cruceta: izquierda y derecha para moverse */
+    if (held & KEY_RIGHT) {
         player.vx=speed;
         player.facing=1;
     }
-
-    /* Y = retroceder */
-    if (held & KEY_Y) {
+    if (held & KEY_LEFT) {
         player.vx=-speed;
         player.facing=-1;
     }
@@ -753,7 +799,7 @@ static void updateBoss(void) {
 
     if (collision((int)player.x,(int)player.y,
                   PLAYER_W,PLAYER_H,
-                  boss.x,boss.y,28,46)) {
+                  boss.x,boss.y,30,46)) {
 
         if (player.vy>1.0f &&
             player.y+PLAYER_H<boss.y+15) {
@@ -788,7 +834,7 @@ static void updateProgress(void) {
 
         levelCompleted[currentLevel]=true;
 
-        if (currentLevel<14) {
+        if (currentLevel<15) {
             if (currentLevel>=unlockedLevel)
                 unlockedLevel=currentLevel+1;
 
@@ -880,7 +926,7 @@ static void drawGame(void) {
     if (boss.active) {
         sx=boss.x-cameraX;
 
-        if (currentLevel==14)
+        if (currentLevel==15)
             drawAbascal(sx,boss.y);
         else
             drawRegionalBoss(sx,boss.y);
@@ -915,19 +961,24 @@ static void drawGame(void) {
    ===================================================== */
 
 static void drawMenu(void) {
-    clearScreen(RGB(4,5,16));
-
-    drawPedro(40,80);
-    drawAbascal(200,80);
-
-    rect(50,35,156,3,RGB(31,20,5));
-    rect(50,38,156,3,RGB(25,5,5));
-
-    rect(75,120,105,22,RGB(10,25,10));
-    borderRect(75,120,105,22,RGB(31,25,5));
-
-    rect(75,150,105,22,RGB(10,10,20));
-    borderRect(75,150,105,22,RGB(31,31,31));
+    int i;
+    clearScreen(RGB(18,25,31));
+    /* cielo, nubes y sol */
+    rect(0,0,256,112,RGB(17,25,31)); rect(199,15,25,25,RGB(31,27,12));
+    for(i=0;i<4;i++){int x=15+i*68;rect(x,27,27,5,RGB(31,31,31));rect(x+6,22,15,5,RGB(31,31,31));}
+    /* colinas */
+    rect(0,104,256,24,RGB(12,22,13)); rect(0,117,256,14,RGB(8,20,10));
+    rect(0,130,256,62,RGB(10,24,12));
+    for(i=0;i<13;i++){int x=i*22;rect(x,119+(i%3)*5,3,14,RGB(6,18,9));rect(x+5,122+(i%2)*4,2,10,RGB(6,18,9));}
+    /* título como placa de videojuego */
+    rect(28,8,200,27,RGB(7,16,26)); borderRect(28,8,200,27,RGB(31,25,8));
+    rect(34,14,188,3,RGB(28,8,6)); rect(34,26,188,3,RGB(28,8,6));
+    /* personajes grandes y reconocibles */
+    drawPedroBig(30,54); drawAbascalBig(181,54);
+    /* botones */
+    rect(78,139,100,19,RGB(9,25,13)); borderRect(78,139,100,19,RGB(31,27,8));
+    rect(78,163,100,19,RGB(8,15,27)); borderRect(78,163,100,19,RGB(25,29,31));
+    rect(86,145,84,2,RGB(20,31,18)); rect(86,169,84,2,RGB(17,23,31));
 }
 
 /* =====================================================
@@ -937,7 +988,9 @@ static void drawMenu(void) {
 static void drawCredits(void) {
     int i;
 
-    clearScreen(RGB(10,5,18));
+    clearScreen(RGB(15,23,31));
+    rect(0,135,256,57,RGB(8,22,13));
+    rect(0,130,256,5,RGB(20,29,14));
 
     /* Instagram pixel art */
     borderRect(100,35,55,55,RGB(31,20,20));
@@ -996,7 +1049,7 @@ static void updateConsole(void) {
     if (state==MENU) {
         iprintf("  A - JUGAR\n");
         iprintf("  Y - CREDITOS\n");
-        iprintf("\n  Pulsa START para comenzar");
+        iprintf("\n  Flechas: moverse | B: saltar");
     }
 
     else if (state==CREDITS) {
@@ -1015,12 +1068,13 @@ static void updateConsole(void) {
     }
 
     else if (state==PLAY || state==PAUSE) {
-        iprintf("  NIVEL %d / 15\n",currentLevel+1);
+        iprintf("  NIVEL %d / 16\n",currentLevel+1);
         iprintf("  %s\n",levelNames[currentLevel]);
         iprintf("  CIUDAD: %s\n",levelCities[currentLevel]);
 
         iprintf("\n  VIDAS: %d\n",lives);
         iprintf("  MONEDAS: %d\n",money);
+        iprintf("  <- -> MOVER | B SALTAR\n");
 
         if (cocaTimer>0)
             iprintf("  COCA ACTIVA!\n");
@@ -1060,6 +1114,7 @@ int main(void) {
     /* Pantalla superior framebuffer */
     videoSetMode(MODE_FB0);
     vramSetBankA(VRAM_A_LCD);
+    fb = (volatile u16 *)VRAM_A;
 
     /* Pantalla inferior consola */
     videoSetModeSub(MODE_0_2D);
@@ -1225,5 +1280,4 @@ int main(void) {
 
     return 0;
 }
-
 
