@@ -10,9 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Compilar NDS
-        run: |
-          source /etc/profile.d/devkit-env.sh
-          make
+        run: make
       - name: Subir archivo NDS
         uses: actions/upload-artifact@v4
         with:
