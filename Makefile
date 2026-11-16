@@ -1,10 +1,10 @@
-export PATH := $(DEVKITARM)/bin:$(PATH)
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
-endif
+export DEVKITPRO := /opt/devkitpro
+export DEVKITARM := /opt/devkitpro/devkitARM
+export PATH := $(DEVKITARM)/bin:$(DEVKITPRO)/tools/bin:$(PATH)
 
 include $(DEVKITARM)/ds_rules
+
+export LD := $(CC)
 
 TARGET		:=	PerroSanchez_DS
 BUILD		:=	build
@@ -79,3 +79,4 @@ $(OUTPUT).elf	:	$(OFILES)
 -include $(DEPENDS)
 
 endif
+
